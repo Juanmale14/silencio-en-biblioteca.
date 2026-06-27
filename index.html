@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guardián del Silencio - IES Francisco Giner de los Ríos</title>
+    <style>
+        /* --- ESTILOS GENERALES Y FUENTES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@400..700&display=swap');
+
+        :root {
+            --bg-color: #eef5f9;         /* Azul claro pastel de fondo */
+            --wall-color: #dbe7f1;       /* Pared azul pastel de la biblioteca */
+            --shelf-wood: #cbb49e;       /* Madera clara pastel para estanterías */
+            --table-wood: #b59273;       /* Madera de la mesa */
+            --accent-blue: #74c0fc;      /* Azul destacado */
+            --accent-gold: #ffd43b;      /* Oro pastel para detalles */
+            --text-dark: #2b3a4a;        /* Texto oscuro suave (azul grisáceo) */
+            --text-light: #f8f9fa;
+            --thermometer-empty: #e9ecef;
+            --panel-bg: rgba(255, 255, 255, 0.85); /* Paneles claros translúcidos */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at top, #f3f8fc 0%, var(--bg-color) 100%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-x: hidden;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .app-container {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            flex-grow: 1;
+            align-items: stretch;
+        }
+
+        @media (min-width: 950px) {
+            .app-container {
+                grid-template-columns: 310px 1fr;
+            }
+        }
+
+        /* --- CABECERA --- */
+        header {
+            text-align: center;
+            padding: 15px 10px 5px;
+            grid-column: 1 / -1;
+        }
+
+        header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.2rem;
+            color: #2b6cb0; /* Azul agradable */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            line-height: 1.2;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        /* --- COLUMNA LATERAL: TERMÓMETRO --- */
+        .sidebar {
+            background: var(--panel-bg);
+            border: 3px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(148, 163, 184, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .meter-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            text-align: center;
+            color: #2b6cb0;
+            font-weight: 600;
+        }
+
+        /* El termómetro */
+        .thermometer-container {
+            position: relative;
+            width: 100px;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .thermometer-tube {
+            width: 36px;
+            height: 300px;
+            background: var(--thermometer-empty);
+            border: 4px solid #fff;
+            border-bottom: none;
+            border-radius: 25px 25px 0 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.06), 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        .thermometer-bulb {
+            width: 74px;
+            height: 74px;
+            background: #2ec4b6; /* Verde inicial */
+            border: 5px solid #fff;
+            border-radius: 50%;
+            margin-top: -15px;
+            z-index: 2;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08), inset 4px 4px 8px rgba(255,255,255,0.5);
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .thermometer-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10%; /* Dinámico */
+            background: linear-gradient(to top, #2ec4b6, #a3e635);
+            transition: height 0.15s ease-out, background 0.3s ease;
+            border-radius: 12px 12px 0 0;
+        }
+
+        /* Graduaciones del termómetro */
+        .ticks {
+            position: absolute;
+            right: 0px;
+            top: 20px;
+            height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #718096;
+        }
+
+        .tick {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tick::before {
+            content: '';
+            width: 8px;
+            height: 2px;
+            background: #cbd5e0;
+        }
+
+        .tick.danger { color: #f87171; }
+        .tick.danger::before { background: #f87171; }
+        .tick.warning { color: #fbbf24; }
+        .tick.warning::before { background: #fbbf24; }
+        .tick.safe { color: #2ec4b6; }
+        .tick.safe::before { background: #2ec4b6; }
+
+        /* Controles de Calibración */
+        .controls {
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn {
+            background-color: #4dabf7;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(77, 171, 247, 0.35);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(77, 171, 247, 0.45);
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn.active {
+            background-color: #ff8787;
+            box-shadow: 0 4px 12px rgba(255, 135, 135, 0.35);
+        }
+
+        .sensitivity-container {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sensitivity-container label {
+            font-size: 0.85rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4dabf7;
+            cursor: pointer;
+            border: 3px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        }
+
+        /* --- COLUMNA PRINCIPAL: LA BIBLIOTECA DEL GATO --- */
+        .library-scene {
+            background: linear-gradient(180deg, var(--wall-color) 0%, #c5d6e6 100%);
+            border: 8px solid var(--shelf-wood);
+            border-radius: 28px;
+            position: relative;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.05), 0 10px 30px rgba(148, 163, 184, 0.12);
+            overflow: hidden;
+        }
+
+        /* Fondo de la biblioteca: Múltiples estanterías y libros en tonos pastel */
+        .bookshelves-container {
+            position: absolute;
+            top: 20px;
+            left: 3%;
+            right: 3%;
+            bottom: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+            opacity: 0.85;
+            z-index: 1;
+        }
+
+        .shelf-row {
+            height: 120px;
+            border-bottom: 6px solid var(--shelf-wood);
+            display: flex;
+            align-items: flex-end;
+            padding-left: 20px;
+            padding-right: 20px;
+            position: relative;
+        }
+
+        /* Libros estilizados */
+        .book-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+        }
+
+        .pastel-book {
+            width: 18px;
+            border-radius: 3px 3px 0 0;
+            box-shadow: inset -3px 0 0 rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        /* Colores pasteles para los libros */
+        .book-blue   { background-color: #a5d8ff; height: 95px; }
+        .book-pink   { background-color: #ffdeeb; height: 85px; }
+        .book-mint   { background-color: #c3fae8; height: 90px; }
+        .book-yellow { background-color: #fff3bf; height: 75px; }
+        .book-purple { background-color: #eebefa; height: 100px; }
+        .book-salmon { background-color: #ffd8a8; height: 80px; }
+
+        .book-slanted {
+            transform: rotate(15deg);
+            transform-origin: bottom right;
+            margin-right: 12px;
+        }
+
+        .book-stack-horizontal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 0px;
+            gap: 2px;
+        }
+
+        .book-horiz {
+            height: 15px;
+            width: 45px;
+            border-radius: 2px;
+            box-shadow: inset 0 -3px 0 rgba(0,0,0,0.05);
+        }
+
+        /* Planta pastel decorativa en estantería */
+        .shelf-plant {
+            margin-left: auto;
+            margin-right: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .pot {
+            width: 30px;
+            height: 25px;
+            background-color: #ffc9c9;
+            border-radius: 0 0 10px 10px;
+        }
+        .leaves {
+            display: flex;
+            gap: 2px;
+            margin-bottom: -2px;
+        }
+        .leaf {
+            width: 10px;
+            height: 15px;
+            background-color: #8ce99a;
+            border-radius: 50% 50% 0 0;
+            transform: rotate(-15deg);
+        }
+        .leaf:nth-child(2) { transform: rotate(0deg); height: 18px; }
+        .leaf:nth-child(3) { transform: rotate(15deg); }
+
+        /* Mesa Principal Estilo Nórdico (Maderas claras) */
+        .library-table {
+            width: 92%;
+            height: 110px;
+            background: linear-gradient(180deg, var(--table-wood) 0%, #9e7a5b 100%);
+            border-top: 8px solid #c9a687;
+            border-radius: 16px 16px 0 0;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* Adornos sobre la mesa */
+        .table-decorations {
+            position: absolute;
+            top: -45px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 8%;
+            pointer-events: none;
+        }
+
+        /* Libros sobre la mesa */
+        .table-books {
+            display: flex;
+            align-items: flex-end;
+        }
+        .table-book {
+            width: 24px;
+            height: 65px;
+            background: #ffb1c1;
+            border-radius: 4px;
+            transform: rotate(-12deg);
+            transform-origin: bottom right;
+            box-shadow: -2px 2px 4px rgba(0,0,0,0.08);
+        }
+        .table-book:nth-child(2) {
+            background: #99e9f2;
+            height: 75px;
+            transform: rotate(0deg);
+            margin-left: -6px;
+        }
+
+        /* Taza de Té */
+        .tea-cup-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .tea-cup {
+            width: 38px;
+            height: 26px;
+            background: #fff;
+            border-radius: 0 0 14px 14px;
+            position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+        }
+        .tea-cup::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 4px;
+            width: 11px;
+            height: 13px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+        }
+        .steam-container {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 2px;
+        }
+        .steam {
+            width: 2px;
+            height: 12px;
+            background: rgba(255,255,255,0.6);
+            border-radius: 2px;
+            animation: steamUp 2.2s infinite ease-in-out;
+        }
+        .steam:nth-child(2) { animation-delay: 0.7s; }
+        .steam:nth-child(3) { animation-delay: 1.4s; }
+
+        @keyframes steamUp {
+            0% { transform: translateY(0) scaleX(1); opacity: 0; }
+            50% { transform: translateY(-7px) scaleX(1.3); opacity: 0.6; }
+            100% { transform: translateY(-14px) scaleX(0.6); opacity: 0; }
+        }
+
+        /* --- EL GATO (SVG MEJORADO - MÁS REALISTA) --- */
+        .cat-container {
+            position: absolute;
+            bottom: 75px;
+            width: 320px;
+            height: 250px;
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            transition: transform 0.2s ease;
+        }
+
+        .cat-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Movimiento de respiración para gato durmiendo */
+        .sleeping-body {
+            animation: catBreathe 3.5s infinite ease-in-out;
+            transform-origin: 150px 180px;
+        }
+
+        @keyframes catBreathe {
+            0%, 100% { transform: scale(1) translateY(0); }
+            50% { transform: scale(1.02, 1.04) translateY(-2px); }
+        }
+
+        /* Elementos reactivos */
+        .eye-sleeping { display: block; }
+        .eye-awake { display: none; }
+        .eye-angry { display: none; }
+        .sign-silence { display: none; }
+        .blush-angry { display: none; }
+
+        /* ESTADOS DEL GATO */
+        .state-awake .eye-sleeping { display: none; }
+        .state-awake .eye-awake { display: block; }
+        
+        .state-angry {
+            animation: catAngryShake 0.25s infinite;
+        }
+        .state-angry .eye-sleeping { display: none; }
+        .state-angry .eye-awake { display: none; }
+        .state-angry .eye-angry { display: block; }
+        .state-angry .blush-angry { display: block; }
+        .state-angry .sign-silence {
+            display: block;
+            animation: signPopUp 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.2) both;
+        }
+        .state-angry .cat-body-main {
+            fill: #fcd34d !important; /* El pelaje se eriza e intensifica el color */
+        }
+
+        @keyframes signPopUp {
+            0% { transform: translateY(60px) scale(0) rotate(-15deg); opacity: 0; }
+            100% { transform: translateY(0) scale(1) rotate(-8deg); opacity: 1; }
+        }
+
+        @keyframes catAngryShake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-2px, 1px); }
+            50% { transform: translate(2px, -1px); }
+            75% { transform: translate(-1px, -1px); }
+        }
+
+        /* Zzz de Dormir */
+        .zzz-container {
+            position: absolute;
+            top: 15px;
+            right: 45px;
+            pointer-events: none;
+        }
+
+        .zzz {
+            position: absolute;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            color: #74c0fc;
+            opacity: 0;
+            animation: flyZzz 4s infinite linear;
+        }
+
+        .zzz:nth-child(1) { font-size: 1.6rem; animation-delay: 0s; }
+        .zzz:nth-child(2) { font-size: 1.2rem; animation-delay: 1.3s; }
+        .zzz:nth-child(3) { font-size: 0.9rem; animation-delay: 2.6s; }
+
+        @keyframes flyZzz {
+            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            50% { transform: translate(25px, -35px) scale(1) rotate(10deg); }
+            80% { opacity: 0.8; }
+            100% { transform: translate(50px, -70px) scale(0.7) rotate(20deg); opacity: 0; }
+        }
+
+        /* Ocultar Zzz según el estado */
+        .state-awake .zzz-container,
+        .state-angry .zzz-container {
+            display: none;
+        }
+
+        /* Alerta visual cuando hay demasiado ruido */
+        .noise-alert-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 135, 135, 0.15);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 5;
+            border-radius: 20px;
+        }
+
+        .state-angry + .noise-alert-overlay {
+            opacity: 1;
+            animation: pulseAlert 1.5s infinite;
+        }
+
+        @keyframes pulseAlert {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* --- MENSAJE INFORMATIVO DE ESTADO --- */
+        .status-message {
+            background: var(--panel-bg);
+            border-radius: 16px;
+            padding: 12px 24px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-top: 15px;
+            color: #4a5568;
+            z-index: 12;
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(148, 163, 184, 0.08);
+            text-align: center;
+        }
+
+        .status-message.calm { color: #0ca678; border-color: #a3e635; }
+        .status-message.warn { color: #f59f00; border-color: #ffe066; }
+        .status-message.danger { color: #f03e3e; border-color: #ffc9c9; animation: pulseText 1s infinite; }
+
+        @keyframes pulseText {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        /* --- PIE DE PÁGINA --- */
+        footer {
+            text-align: center;
+            padding: 25px 20px;
+            margin-top: 25px;
+            border-top: 1px solid #e2e8f0;
+            background: #fff;
+        }
+
+        footer p {
+            font-size: 0.95rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        footer a {
+            color: #4dabf7;
+            text-decoration: none;
+            font-weight: 700;
+            transition: color 0.2s ease;
+            border-bottom: 2px dashed #a5d8ff;
+        }
+
+        footer a:hover {
+            color: #228be6;
+            border-bottom-style: solid;
+        }
+
+        /* Modal para errores / avisos */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(43, 58, 74, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #fff;
+            border: 3px solid var(--shelf-wood);
+            padding: 30px;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .modal-content h3 {
+            font-family: 'Fredoka', sans-serif;
+            color: #2b6cb0;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 24px;
+            line-height: 1.6;
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            background: #4dabf7;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'Quicksand', sans-serif;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(77, 171, 247, 0.3);
+        }
+
+        .modal-close:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABECERA -->
+    <header>
+        <h1>Guardián del silencio de la biblioteca del IES Francisco Giner de los Ríos</h1>
+        <p>Un espacio tranquilo para la lectura y el aprendizaje</p>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="app-container">
+        
+        <!-- COLUMNA IZQUIERDA: TERMÓMETRO Y CONTROLES -->
+        <aside class="sidebar">
+            <div class="meter-title">Nivel de Ruido</div>
+            
+            <div class="thermometer-container">
+                <div class="thermometer-tube">
+                    <div class="thermometer-fill" id="noiseFill"></div>
+                </div>
+                <div class="thermometer-bulb" id="noiseBulb"></div>
+                
+                <div class="ticks">
+                    <div class="tick danger" style="bottom: 75%;">¡RUIDO!</div>
+                    <div class="tick warning" style="bottom: 45%;">Moderado</div>
+                    <div class="tick safe" style="bottom: 15%;">Silencio</div>
+                </div>
+            </div>
+
+            <!-- CONTROLES -->
+            <div class="controls">
+                <button class="btn" id="micBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                    </svg>
+                    <span id="btnText">Escuchar Aula</span>
+                </button>
+                
+                <div class="sensitivity-container">
+                    <label for="sensitivity">Sensibilidad del Micrófono</label>
+                    <input type="range" id="sensitivity" class="slider" min="1" max="10" value="5">
+                </div>
+            </div>
+        </aside>
+
+        <!-- COLUMNA DERECHA: ESCENA DE LA BIBLIOTECA -->
+        <main class="library-scene">
+            <!-- Biblioteca de fondo: Estantes con gran variedad de libros pasteles -->
+            <div class="bookshelves-container">
+                <!-- Estante Superior -->
+                <div class="shelf-row">
+                    <div class="book-group">
+                        <div class="pastel-book book-purple"></div>
+                        <div class="pastel-book book-blue"></div>
+                        <div class="pastel-book book-mint"></div>
+                        <div class="pastel-book book-yellow book-slanted"></div>
+                    </div>
+                    <div class="book-group" style="margin-left: 20px;">
+                        <div class="pastel-book book-pink"></div>
+                        <div class="pastel-book book-salmon"></div>
+                        <div class="pastel-book book-blue"></div>
+                    </div>
+                    <div class="shelf-plant">
+                        <div class="leaves">
+                            <div class="leaf"></div>
+                            <div class="leaf"></div>
+                            <div class="leaf"></div>
+                        </div>
+                        <div class="pot"></div>
+                    </div>
+                </div>
+                <!-- Estante Inferior -->
+                <div class="shelf-row">
+                    <div class="book-stack-horizontal" style="margin-left: 10px;">
+                        <div class="book-horiz book-mint"></div>
+                        <div class="book-horiz book-pink"></div>
+                        <div class="book-horiz book-blue"></div>
+                    </div>
+                    <div class="book-group" style="margin-left: 15px;">
+                        <div class="pastel-book book-salmon" style="height: 90px;"></div>
+                        <div class="pastel-book book-purple" style="height: 85px;"></div>
+                        <div class="pastel-book book-yellow" style="height: 95px;"></div>
+                        <div class="pastel-book book-blue book-slanted" style="height: 80px;"></div>
+                    </div>
+                    <div class="book-group" style="margin-left: auto; margin-right: 25px;">
+                        <div class="pastel-book book-pink" style="height: 75px;"></div>
+                        <div class="pastel-book book-mint" style="height: 85px;"></div>
+                        <div class="pastel-book book-purple" style="height: 90px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gato y sus Zzz -->
+            <div class="cat-container" id="catWrapper">
+                <!-- Zzz animados para dormir -->
+                <div class="zzz-container">
+                    <span class="zzz">Z</span>
+                    <span class="zzz">z</span>
+                    <span class="zzz">z</span>
+                </div>
+
+                <!-- SVG del Gato Mejorado (Más realista y adorable) -->
+                <svg class="cat-svg" viewBox="0 0 320 250" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Grupo del Gato Completo -->
+                    <g class="sleeping-body">
+                        <!-- Cola Felina larga y elegante -->
+                        <path d="M 65 170 Q 15 150 25 105 Q 32 75 55 95 Q 68 115 50 135 Q 42 145 60 155" fill="none" stroke="#e3d5ca" stroke-width="12" stroke-linecap="round" />
+                        
+                        <!-- Patas traseras perfiladas para dar realismo al cuerpo acurrucado -->
+                        <ellipse cx="105" cy="180" rx="35" ry="22" fill="#d5bdaf" />
+                        
+                        <!-- Cuerpo principal del gato (Forma orgánica y suave de gato acostado) -->
+                        <path class="cat-body-main" d="M 90 140 C 90 100, 210 100, 210 145 C 210 190, 90 200, 90 140 Z" fill="#f5ebe0" stroke="#e3d5ca" stroke-width="4" stroke-linejoin="round" />
+                        
+                        <!-- Pata Delantera que reposa relajada -->
+                        <path d="M 170 175 Q 185 190 200 175 Q 190 160 170 175" fill="#e3d5ca" stroke="#d5bdaf" stroke-width="2" />
+                        
+                        <!-- Cabeza del gato (unida armónicamente al cuerpo) -->
+                        <path class="cat-body-main" d="M 195 145 C 180 115, 245 115, 235 145 C 225 175, 185 165, 195 145 Z" fill="#f5ebe0" stroke="#e3d5ca" stroke-width="4" />
+
+                        <!-- Oreja Izquierda estilizada con profundidad física -->
+                        <path d="M 190 120 L 182 82 Q 180 75 187 78 L 208 108 Z" fill="#f5ebe0" stroke="#e3d5ca" stroke-width="4" stroke-linejoin="round" />
+                        <path d="M 193 115 L 187 87 L 203 105 Z" fill="#fbc5c5" />
+
+                        <!-- Oreja Derecha estilizada con profundidad física -->
+                        <path d="M 230 120 L 238 82 Q 240 75 233 78 L 212 108 Z" fill="#f5ebe0" stroke="#e3d5ca" stroke-width="4" stroke-linejoin="round" />
+                        <path d="M 227 115 L 233 87 L 217 105 Z" fill="#fbc5c5" />
+
+                        <!-- Mofletes redondeados realistas (Hocico de gato) -->
+                        <path d="M 203 148 Q 210 154 214 148 Q 218 154 225 148" fill="none" stroke="#d5bdaf" stroke-width="2.5" stroke-linecap="round" />
+                        <!-- Nariz rosada pequeña -->
+                        <polygon points="214,144 211,140 217,140" fill="#fbc5c5" />
+
+                        <!-- Mejillas sonrojadas de furia (Solo estado enfadado) -->
+                        <ellipse class="blush-angry" cx="198" cy="144" rx="6" ry="4" fill="#f03e3e" opacity="0.6" />
+                        <ellipse class="blush-angry" cx="230" cy="144" rx="6" ry="4" fill="#f03e3e" opacity="0.6" />
+
+                        <!-- Bigotes finos de gato realista -->
+                        <line x1="195" y1="147" x2="175" y2="145" stroke="#d5bdaf" stroke-width="2" />
+                        <line x1="195" y1="151" x2="173" y2="153" stroke="#d5bdaf" stroke-width="2" />
+                        <line x1="233" y1="147" x2="253" y2="145" stroke="#d5bdaf" stroke-width="2" />
+                        <line x1="233" y1="151" x2="255" y2="153" stroke="#d5bdaf" stroke-width="2" />
+
+                        <!-- Ojos Durmiendo (Curvas realistas que demuestran relajación) -->
+                        <g class="eye-sleeping">
+                            <path d="M 193 133 Q 200 139 205 133" fill="none" stroke="#5c534c" stroke-width="3" stroke-linecap="round" />
+                            <path d="M 223 133 Q 216 139 211 133" fill="none" stroke="#5c534c" stroke-width="3" stroke-linecap="round" />
+                        </g>
+
+                        <!-- Ojos Despiertos (Hermosos ojos de gato con iris almendrado) -->
+                        <g class="eye-awake">
+                            <!-- Esclerótica/Iris verde pastel -->
+                            <ellipse cx="198" cy="132" rx="7" ry="9" fill="#a3e635" stroke="#5c534c" stroke-width="1.5" />
+                            <ellipse cx="220" cy="132" rx="7" ry="9" fill="#a3e635" stroke="#5c534c" stroke-width="1.5" />
+                            <!-- Pupila almendrada -->
+                            <ellipse cx="198" cy="132" rx="2.5" ry="7" fill="#1a1a1a" />
+                            <ellipse cx="220" cy="132" rx="2.5" ry="7" fill="#1a1a1a" />
+                            <!-- Brillo sutil de ojo -->
+                            <circle cx="196" cy="129" r="2" fill="#fff" />
+                            <circle cx="218" cy="129" r="2" fill="#fff" />
+                        </g>
+
+                        <!-- Ojos Enfadados (Párpados oblicuos de enfado) -->
+                        <g class="eye-angry">
+                            <!-- Ceño fruncido -->
+                            <path d="M 188 120 L 205 129" stroke="#5c534c" stroke-width="3" stroke-linecap="round" />
+                            <path d="M 230 120 L 213 129" stroke="#5c534c" stroke-width="3" stroke-linecap="round" />
+                            <!-- Ojos semicerrados amarillos de molestia -->
+                            <path d="M 191 135 Q 199 126 205 135 Z" fill="#ffd43b" stroke="#5c534c" stroke-width="2" />
+                            <path d="M 221 135 Q 213 126 207 135 Z" fill="#ffd43b" stroke="#5c534c" stroke-width="2" />
+                            <!-- Pupilas ultra finas de amenaza -->
+                            <line x1="198" y1="129" x2="198" y2="135" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" />
+                            <line x1="214" y1="129" x2="214" y2="135" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" />
+                        </g>
+                    </g>
+
+                    <!-- Cartel de Silencio (Aparece y se mueve suavemente al enfadarse) -->
+                    <g class="sign-silence" transform="translate(15, -12)">
+                        <!-- Palo del cartel con madera veteada -->
+                        <rect x="75" y="55" width="12" height="115" fill="#a17a5a" rx="4" />
+                        <!-- Tablilla del cartel con bordes redondeados bonitos -->
+                        <rect x="5" y="8" width="152" height="68" fill="#fff" stroke="#ff8787" stroke-width="4" rx="12" />
+                        <!-- Texto en rojo y gris oscuro -->
+                        <text x="81" y="32" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="14" fill="#e03e3e" text-anchor="middle">¡SILENCIO,</text>
+                        <text x="81" y="54" font-family="'Fredoka', sans-serif" font-weight="bold" font-size="12" fill="#495057" text-anchor="middle">POR FAVOR!</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Mesa delantera -->
+            <div class="library-table">
+                <div class="table-decorations">
+                    <div class="table-books">
+                        <div class="table-book"></div>
+                        <div class="table-book"></div>
+                    </div>
+                    <div class="tea-cup-container">
+                        <div class="steam-container">
+                            <div class="steam"></div>
+                            <div class="steam"></div>
+                            <div class="steam"></div>
+                        </div>
+                        <div class="tea-cup"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerta por demasiado ruido -->
+            <div class="noise-alert-overlay"></div>
+        </main>
+
+        <!-- MENSAJE DE ESTADO INFERIOR -->
+        <div style="grid-column: 1 / -1; display: flex; justify-content: center;">
+            <div class="status-message calm" id="statusMessage">La biblioteca está en completo silencio. El minino duerme.</div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADVERTENCIA PARA MICRÓFONO -->
+    <div class="modal" id="infoModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Uso del Micrófono</h3>
+            <p id="modalBody">Para activar el guardián de ruido de la biblioteca, necesitaremos acceso a tu micrófono. Al hacer clic en el botón "Escuchar Aula", acepta la solicitud del navegador.</p>
+            <button class="modal-close" id="modalClose">Entendido</button>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        <p>Aplicación creada por <a href="https://blogsaverroes.juntadeandalucia.es/ellocodelamochila/" target="_blank" rel="noopener noreferrer">El loco de la mochila</a> en 2026. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // --- LOGICA DE AUDIO Y CONTROL DE INTERFAZ ---
+        let audioContext = null;
+        let analyser = null;
+        let dataArray = null;
+        let microphoneStream = null;
+        let isListening = false;
+        let animationFrameId = null;
+        let smoothedVolume = 0; 
+        
+        // ELEMENTOS DEL DOM
+        const micBtn = document.getElementById('micBtn');
+        const btnText = document.getElementById('btnText');
+        const noiseFill = document.getElementById('noiseFill');
+        const noiseBulb = document.getElementById('noiseBulb');
+        const sensitivityInput = document.getElementById('sensitivity');
+        const catWrapper = document.getElementById('catWrapper');
+        const statusMessage = document.getElementById('statusMessage');
+        const infoModal = document.getElementById('infoModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalBody = document.getElementById('modalBody');
+        const modalClose = document.getElementById('modalClose');
+
+        // Umbrales del medidor de decibelios
+        const LIMITE_DESPIERTO = 28; 
+        const LIMITE_ENFADADO = 65;  
+
+        function showModal(title, text) {
+            modalTitle.innerText = title;
+            modalBody.innerText = text;
+            infoModal.style.display = 'flex';
+        }
+
+        modalClose.addEventListener('click', () => {
+            infoModal.style.display = 'none';
+        });
+
+        micBtn.addEventListener('click', async () => {
+            if (!isListening) {
+                await startListening();
+            } else {
+                stopListening();
+            }
+        });
+
+        async function startListening() {
+            try {
+                // Solicitar acceso
+                microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(microphoneStream);
+                
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256; 
+                
+                source.connect(analyser);
+                
+                const bufferLength = analyser.frequencyBinCount;
+                dataArray = new Uint8Array(bufferLength);
+                
+                isListening = true;
+                micBtn.classList.add('active');
+                btnText.innerText = "Detener Medidor";
+                
+                analyzeNoise();
+                
+            } catch (err) {
+                console.error('Error de micrófono:', err);
+                showModal('Permiso Requerido', 'No se ha podido acceder al micrófono. Por favor, asegúrate de activar los permisos en la barra de direcciones de tu navegador.');
+                stopListening();
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            micBtn.classList.remove('active');
+            btnText.innerText = "Escuchar Aula";
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+            }
+            if (microphoneStream) {
+                microphoneStream.getTracks().forEach(track => track.stop());
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            
+            updateInterface(0);
+        }
+
+        function analyzeNoise() {
+            if (!isListening) return;
+            
+            animationFrameId = requestAnimationFrame(analyzeNoise);
+            analyser.getByteFrequencyData(dataArray);
+            
+            let total = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                total += dataArray[i];
+            }
+            const average = total / dataArray.length;
+            const sensitivityFactor = parseFloat(sensitivityInput.value);
+            
+            // Fórmula adaptativa para calcular volumen relativo útil
+            let targetVolume = (average / 120) * 100 * (sensitivityFactor / 5);
+            if (targetVolume > 100) targetVolume = 100;
+            
+            // Filtro amortiguador para que la reacción sea elegante y no parpadee
+            smoothedVolume = (smoothedVolume * 0.85) + (targetVolume * 0.15);
+            
+            updateInterface(smoothedVolume);
+        }
+
+        function updateInterface(volume) {
+            // Actualizar la barra del termómetro
+            noiseFill.style.height = `${volume}%`;
+            
+            let color = "#2ec4b6"; // Verde pastel (Silencio)
+            
+            if (volume > LIMITE_ENFADADO) {
+                color = "#ff8787"; // Rojo pastel (Ruidoso)
+            } else if (volume > LIMITE_DESPIERTO) {
+                color = "#ffd43b"; // Amarillo/naranja pastel (Moderado)
+            }
+            
+            noiseFill.style.background = `linear-gradient(to top, #2ec4b6, ${color})`;
+            noiseBulb.style.backgroundColor = color;
+            
+            // Reacción del gato en la escena
+            if (volume > LIMITE_ENFADADO) {
+                catWrapper.className = "cat-container state-angry";
+                statusMessage.innerText = "¡¡SHHH!! ¡Demasiado ruido! El gato se ha enfadado y pide silencio.";
+                statusMessage.className = "status-message danger";
+            } else if (volume > LIMITE_DESPIERTO) {
+                catWrapper.className = "cat-container state-awake";
+                statusMessage.innerText = "El nivel es moderado. El gato se ha despertado y vigila la sala.";
+                statusMessage.className = "status-message warn";
+            } else {
+                catWrapper.className = "cat-container"; // Estado por defecto: Durmiendo
+                statusMessage.innerText = "Silencio absoluto. El gato duerme plácidamente en el IES.";
+                statusMessage.className = "status-message calm";
+            }
+        }
+    </script>
+</body>
+</html>
